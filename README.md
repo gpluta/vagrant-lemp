@@ -27,11 +27,11 @@ To check nginx and php simply run:
 ```shell
 $ curl localhost:8888
 ```
-
+ 
 To check the db connection:
 
 ``` 
-$ mysql --host=127.0.0.1 --user=webappuser --password=P@ssw0rd WEBAP
+$ mysql --host=127.0.0.1 --user=webappuser --password=P@ssw0rd WEBAPP
 ```
 
 Feel free to tweak all the settings.
