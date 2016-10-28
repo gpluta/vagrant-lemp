@@ -7,7 +7,6 @@ This is a simple PHP 7 development environment based on Ubuntu Xenial (16.04)
 - nginx
 - MySQL
 - php-fpm 7.0
-- MongoDB
 
 ### Environment description
 
@@ -17,8 +16,6 @@ MySQL port 3306 is also forwarded to your host machine.
 The provisioning script creates a `WEBAPP` database for you.
 It also creates two users for you: `'webappuser'@'localhost'` and `'webappuser'@'10.0.2.2'` - the first one has full access to `WEBAPP` database on your gues OS and the second one has full access to your DB from your host machine.
 Both users share the same password: `P@ssw0rd`.
-
-MongoDB was recently added as an alternative NoSQL database.
 
 ### Getting the environment up
 ```shell
