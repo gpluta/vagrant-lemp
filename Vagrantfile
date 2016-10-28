@@ -12,7 +12,7 @@ Vagrant.configure("2") do |config|
   config.vm.network :forwarded_port, guest: 80, host: 8888
 
   #MySQL
-  config.vm.network :forwarded_port, guest: 3306, host: 3306
+  config.vm.network :forwarded_port, guest: 3306, host: 33306
 
   config.vm.provision :shell, path: "vagrant_bootstrap/bootstrap.sh"
 end

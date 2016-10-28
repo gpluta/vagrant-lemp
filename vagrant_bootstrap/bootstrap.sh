@@ -15,9 +15,39 @@ nginx -v
 echo "Installing php-fpm and php-mysql";
 sudo apt-get install php-fpm php-mysql -y
 
-# configure nginx (see "nginx_config")
-sudo rm /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
-sudo ln -s /vagrant/vagrant_bootstrap/nginx_config /etc/nginx/sites-enabled
+sudo bash -c "cat > /etc/nginx/sites-enabled/default" << EOF
+server {
+    listen 80;
+    listen [::]:80 http2;
+    server_name default_server;
+
+    root /vagrant/public;
+    index index.php index.html;
+
+    location ~ \.php$ {
+        # regex to split \$uri to \$fastcgi_script_name and \$fastcgi_path
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+
+        # Check that the PHP script exists before passing it
+        try_files \$fastcgi_script_name =404;
+
+        # Bypass the fact that try_files resets \$fastcgi_path_info
+        # see: http://trac.nginx.org/nginx/ticket/321
+        set \$path_info \$fastcgi_path_info;
+        fastcgi_param PATH_INFO \$path_info;
+
+        fastcgi_index index.php;
+        include fastcgi.conf;
+
+        fastcgi_pass unix:/run/php/php7.0-fpm.sock;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}
+EOF
+
 sudo systemctl restart nginx
 
 # prepare mysql installation anserws
@@ -31,8 +61,20 @@ echo "mysql version is:"
 mysql --version
 
 #configure MySQL
-sudo rm /etc/mysql/my.cnf
-sudo ln -s /vagrant/vagrant_bootstrap/mysqld_conf /etc/mysql/my.cnf
+#sudo rm /etc/mysql/my.cnf
+sudo bash -c "cat > /etc/mysql/my.cnf" << EOF
+!includedir /etc/mysql/conf.d/
+!includedir /etc/mysql/mysql.conf.d/
+# start your overrides
+[mysql]
+bind-address = 0.0.0.0
+
+EOF
+
+#####
+##### Somehow comment out `skip-external-locking' from /etc/mysql/mysql.conf.d/mysqld.cnf
+#####
+
 sudo mysql -u root -pP@ssw0rd -e "create database WEBAPP";
 mysql -u root -pP@ssw0rd -e "CREATE USER 'webappuser'@'localhost' IDENTIFIED BY 'P@ssw0rd'";
 mysql -u root -pP@ssw0rd -e "GRANT ALL PRIVILEGES ON WEBAPP.* TO 'webappuser'@'localhost'";
@@ -42,11 +84,4 @@ mysql -u root -pP@ssw0rd -e "GRANT ALL PRIVILEGES ON WEBAPP.* TO 'webappuser'@'1
 mysql -u root -pP@ssw0rd -e "FLUSH PRIVILEGES";
 
 sudo systemctl restart mysql
-
-#install MongoDB
-sudo apt-get install -y mongodb-org
-sudo cp /vagrant/vagrant_bootstrap/mongodb.service /etc/systemd/system/
-sudo systemctl start mongodb
-sudo systemctl status mongodb
-#enable MongoDB on system startup
-sudo systemctl enable mongodb
+sudo systemctl enable mysql
