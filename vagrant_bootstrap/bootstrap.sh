@@ -18,7 +18,7 @@ sudo apt-get install php-fpm php-mysql -y
 sudo bash -c "cat > /etc/nginx/sites-enabled/default" << EOF
 server {
     listen 80;
-    listen [::]:80 http2;
+    listen [::]:80;
     server_name default_server;
 
     root /vagrant/public;
